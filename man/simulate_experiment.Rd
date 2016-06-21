@@ -166,13 +166,15 @@ Reads can either be simulated from a FASTA file of transcripts
   characters.
   \item You can also include other parameters to pass to
   \code{\link{seq_gtf}} if you're simulating from a GTF file.
-  \item \code{fraggcbias}: (new argument) a list of either NULL, or functions
-  (can be a combination). The function should
+  \item \code{fragGCBias}: (new argument) either NULL or a function
+  The function should
   map from GC content (in [0,1]) to the probability of observing a fragment,
   based on the fragment's GC content. A coin is flipped inside
   \code{generate_fragments} and only fragments which pass the coin
-  flip are returned. If not specified, the default is NULL (no fragment GC bias).
+  flip are returned.
   This should be used INSTEAD of \code{gcbias} above.
+  \item \code{fragGCBiasData}: (new argument) a list of data which will be
+  used within \code{fragGCBias}. should be as long as the number of samples.
   }
 }
 \examples{

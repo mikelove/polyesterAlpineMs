@@ -70,7 +70,7 @@
 #'   biased_frags
 #'  
 generate_fragments = function(tObj, fraglen=250, fragsd=25, 
-    readlen=100, distr='normal', custdens=NULL, bias='none', fraggcbias=NULL){
+    readlen=100, distr='normal', custdens=NULL, bias='none', fragGCBias=NULL, fragGCBiasData=NULL){
     bias = match.arg(bias, c('none', 'rnaf', 'cdnaf'))
     distr = match.arg(distr, c('normal', 'empirical', 'custom'))
     L = width(tObj)
@@ -78,7 +78,10 @@ generate_fragments = function(tObj, fraglen=250, fragsd=25,
         data('empirical_density')
         fraglens = round(rlogspline(L, empirical_density))
     }else if(distr == 'normal'){
-        fraglens = round(rnorm(L, mean=fraglen, sd=fragsd)) 
+        fraglens = round(rnorm(L, mean=fraglen, sd=fragsd))
+        ### new code ###
+        fraglens[fraglens < readlen] <- readlen
+        ### end new code ###
     }else{
         # distr == 'custom'
         if(is.null(custdens)){
@@ -115,8 +118,8 @@ generate_fragments = function(tObj, fraglen=250, fragsd=25,
 
     ### new code from Michael Love ###
     gc <- as.numeric(letterFrequency(tObj, "CG", as.prob=TRUE))
-    if (!is.null(fraggcbias)) {
-      prob <- fraggcbias(gc) # fraggcbias is a function on gc content
+    if (!is.null(fragGCBias)) {
+      prob <- fragGCBias(gc, fragGCBiasData) # fragGCBias is a function on gc content
       stopifnot(all(prob >= 0 & prob <= 1))
       coinflip <- rbinom(length(gc), 1, prob) # flip a coin
       tObj <- tObj[ coinflip == 1 ] # only return successes

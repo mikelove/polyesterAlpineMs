@@ -1,14 +1,36 @@
-# an edited branch of the official polyester development branch
+#### version 1.5
 
-This branch is edited by @mikelove to include fragment GC content effects, producing variable coverage within transcripts which can lead to errors in transcript abundance estimation.
+#### modified branch of the polyester devel branch
 
-The main code addition is here:
+This branch of [polyester](https://github.com/alyssafrazee/polyester) is edited by @mikelove to include fragment GC content effects, producing variable coverage within transcripts which can lead to errors in transcript abundance estimation.
+
+* The main code addition with the fragment GC bias is here:
 
 https://github.com/mikelove/polyester/blob/master/R/generate_fragments.R#L116-L124
 
+Some other modifications:
+
+* I added iterators for fragment length and SD here:
+
+https://github.com/mikelove/polyester/blob/master/R/sgseq.R#L18-L20
+
+* I allow counts of 0 fragments:
+
+https://github.com/mikelove/polyester/blob/master/R/simulate_experiment.R#L359-L360
+
+* I save the internal count table:
+
+https://github.com/mikelove/polyester/blob/master/R/simulate_experiment.R#L396-L399
+
+* I allow a dry run, 'weightsOnly', where only the total counts are determined:
+
+https://github.com/mikelove/polyester/blob/master/R/sgseq.R#L23-L26
+
 The additional functionality is documented here:
 
-https://github.com/mikelove/polyester/blob/master/man/simulate_experiment.Rd#L169-L175
+https://github.com/mikelove/polyester/blob/master/man/simulate_experiment.Rd#L169-L177
+
+---
 
 # Introduction
 

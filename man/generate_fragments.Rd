@@ -5,7 +5,8 @@
 \title{generate a set of fragments from a set of transcripts}
 \usage{
 generate_fragments(tObj, fraglen = 250, fragsd = 25, readlen = 100,
-  distr = "normal", custdens = NULL, bias = "none", fraggcbias = NULL)
+  distr = "normal", custdens = NULL, bias = "none", fragGCBias = NULL,
+  fragGCBiasData = NULL)
 }
 \arguments{
 \item{tObj}{DNAStringSet of sequences from which fragments should be

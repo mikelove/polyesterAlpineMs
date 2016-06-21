@@ -15,6 +15,9 @@
 NB = function(basemeans, size, seed=NULL){
     if(!is.null(seed)) set.seed(seed)
     numreads = rnbinom(n = length(basemeans), mu = basemeans, size = size)
-    numreads[numreads == 0] = 1
+
+    ### remove old code: allow 0's here ###
+    # numreads[numreads == 0] = 1
+    
     return(numreads)
 }

@@ -145,6 +145,9 @@
 #'   your simulation). 
 #' @param paired If \code{TRUE}, paired-end reads are simulated; else 
 #'   single-end reads are simulated. Default \code{TRUE}
+#' @param weightsOnly Only return weights: the amount we need to increase
+#' library size pre-fragGCBias for constant expected library size
+#' in the output
 #' @param ... any of several other arguments that can be used to add nuance
 #'   to the simulation. See details. 
 #' 
@@ -238,13 +241,15 @@
 #'   characters.
 #'   \item You can also include other parameters to pass to 
 #'   \code{\link{seq_gtf}} if you're simulating from a GTF file.
-#'   \item \code{fraggcbias}: (new argument) a list of either NULL, or functions
-#'   (can be a combination). The function should 
+#'   \item \code{fragGCBias}: (new argument) either NULL or a function
+#'   The function should 
 #'   map from GC content (in [0,1]) to the probability of observing a fragment,
 #'   based on the fragment's GC content. A coin is flipped inside
 #'   \code{generate_fragments} and only fragments which pass the coin
-#'   flip are returned. If not specified, the default is NULL (no fragment GC bias).
+#'   flip are returned. 
 #'   This should be used INSTEAD of \code{gcbias} above.
+#'   \item \code{fragGCBiasData}: (new argument) a list of data which will be
+#'   used within \code{fragGCBias}. should be as long as the number of samples.
 #'   }
 #' 
 #' @references
@@ -284,7 +289,7 @@
 #' 
 simulate_experiment = function(fasta=NULL, gtf=NULL, seqpath=NULL, 
     outdir='.', num_reps=c(10,10), reads_per_transcript=300, size=NULL,
-    fold_changes, paired=TRUE, ...){
+    fold_changes, paired=TRUE, weightsOnly=FALSE, ...){
 
     extras = list(...)
 
@@ -324,7 +329,10 @@ simulate_experiment = function(fasta=NULL, gtf=NULL, seqpath=NULL,
         logmus = b0 + b1*log2(width(transcripts)) + rnorm(length(transcripts),0,sigma)
         reads_per_transcript = 2^logmus-1
     }
-    basemeans = ceiling(reads_per_transcript * fold_changes)
+
+    ### new code: remove the ceiling here ###
+    basemeans = reads_per_transcript * fold_changes
+    
     if(is.null(size)){
         size = basemeans / 3
     }else if(class(size) == 'numeric'){
@@ -347,7 +355,10 @@ simulate_experiment = function(fasta=NULL, gtf=NULL, seqpath=NULL,
         NB(as.matrix(basemeans)[,group_id], as.matrix(size)[,group_id])
     })
     readmat = matrix(unlist(numreadsList), ncol=sum(num_reps))
-    readmat = ceiling(t(extras$lib_sizes * t(readmat)))
+
+    ### new code: remove the ceiling here ###
+    readmat = t(extras$lib_sizes * t(readmat))
+    
     if('gcbias' %in% names(extras)){
         stopifnot(length(extras$gcbias) == sum(num_reps))
         gcclasses = unique(sapply(extras$gcbias, class))
@@ -360,17 +371,20 @@ simulate_experiment = function(fasta=NULL, gtf=NULL, seqpath=NULL,
         }
     }
 
-    # prep output directory
-    sysoutdir = gsub(' ', '\\\\ ', outdir)
-    if(.Platform$OS.type == 'windows'){
+    if (!weightsOnly) {      
+      # prep output directory
+      sysoutdir = gsub(' ', '\\\\ ', outdir)
+      if(.Platform$OS.type == 'windows'){
         shell(paste('mkdir', sysoutdir))
-    }else{
-        system(paste('mkdir -p', sysoutdir))    
+      }else{
+         system(paste('mkdir -p', sysoutdir))    
+       }
     }
-
+    
     # do the actual sequencing
-    sgseq(readmat, transcripts, paired, outdir, extras)
-
+    weightsOut <- sgseq(readmat, transcripts, paired, outdir, extras, weightsOnly)
+    if (weightsOnly) return(weightsOut)
+    
     # write out simulation information, if asked for:
     if(!('write_info' %in% names(extras))){
         write_info=TRUE
@@ -381,6 +395,16 @@ simulate_experiment = function(fasta=NULL, gtf=NULL, seqpath=NULL,
         group_ids)     
     }
 
+    ### new code: this writes out the count table ###
+    # note: this is the *unbiased count*, but in generate_fragments
+    # we remove fragments based on fragment GC bias, so the
+    # actual number of fragments finally generated is less
+    countsMatrix <- readmat
+    rownames(countsMatrix) <- names(transcripts)
+    colnames(countsMatrix) <- seq_len(ncol(countsMatrix))
+    write.csv(countsMatrix, file=file.path(outdir,"countsMatrix.csv"))
+    ### end of new code ###
+    
 }
 
 # simulate_experiment(fastapath, reads_per_transcript=10, outdir='~/Desktop/tmp', num_reps=1)
