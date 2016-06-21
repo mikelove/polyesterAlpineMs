@@ -6,29 +6,29 @@ This branch of [polyester](https://github.com/alyssafrazee/polyester) is edited 
 
 * The main code addition with the fragment GC bias is here:
 
-https://github.com/mikelove/polyester/blob/master/R/generate_fragments.R#L116-L124
+https://github.com/mikelove/polyesterAlpineMs/blob/master/R/generate_fragments.R#L119-L127
 
 Some other modifications:
 
 * I added iterators for fragment length and SD here:
 
-https://github.com/mikelove/polyester/blob/master/R/sgseq.R#L18-L20
+https://github.com/mikelove/polyesterAlpineMs/blob/master/R/sgseq.R#L19-L22
 
 * I allow counts of 0 fragments:
 
-https://github.com/mikelove/polyester/blob/master/R/simulate_experiment.R#L359-L360
+https://github.com/mikelove/polyesterAlpineMs/blob/master/R/simulate_experiment.R#L359-L360
 
 * I save the internal count table:
 
-https://github.com/mikelove/polyester/blob/master/R/simulate_experiment.R#L396-L399
+https://github.com/mikelove/polyesterAlpineMs/blob/master/R/simulate_experiment.R#L398-L406
 
 * I allow a dry run, 'weightsOnly', where only the total counts are determined:
 
-https://github.com/mikelove/polyester/blob/master/R/sgseq.R#L23-L26
+https://github.com/mikelove/polyesterAlpineMs/blob/master/R/sgseq.R#L23-L27
 
 The additional functionality is documented here:
 
-https://github.com/mikelove/polyester/blob/master/man/simulate_experiment.Rd#L169-L177
+https://github.com/mikelove/polyesterAlpineMs/blob/master/man/simulate_experiment.Rd#L169-L177
 
 ---
 
