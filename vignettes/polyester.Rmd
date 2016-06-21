@@ -1,15 +1,7 @@
-# an edited branch of the official polyester development branch
-
-This branch is edited by @mikelove to include fragment GC content effects, producing variable coverage within transcripts which can lead to errors in transcript abundance estimation.
-
-The main code addition is here:
-
-https://github.com/mikelove/polyester/blob/master/R/generate_fragments.R#L116-L124
-
-The additional functionality is documented here:
-
-https://github.com/mikelove/polyester/blob/master/man/simulate_experiment.Rd#L169-L175
-
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{The Polyester package for simulating RNA-seq reads}
+-->
 # Introduction
 
 Polyester is an R package designed to simulate RNA sequencing experiments with differential transcript expression. 
@@ -29,8 +21,7 @@ Polyester offers several unique features:
 
 Start R and run:
 
-
-```r
+```{r installme, eval=FALSE}
 source("http://bioconductor.org/biocLite.R")
 biocLite("polyester")
 ```
@@ -55,27 +46,15 @@ A FASTA file called `chr22.fa` is provided with `polyester`. This file contains 
 
 We will set the first 2 transcripts to be overexpressed in group A and the next 2 transcripts to be overexpressed in group B, each at a fold change of 3. The way to do this in Polyester is to provide a "fold change matrix": for each transcript and each group, specify a fold change. Polyester will generate baseline read numbers (assuming no differential expression), and will then multiply those mean numbers by the fold change you specify for the replicates in that group. The fold change matrix for this simple 2-group experiment looks like this:
 
-
-```r
+```{r fcmat}
 fold_changes = matrix(c(4,4,rep(1,18),1,1,4,4,rep(1,16)), nrow=20)
 head(fold_changes)
-```
-
-```
-##      [,1] [,2]
-## [1,]    4    1
-## [2,]    4    1
-## [3,]    1    4
-## [4,]    1    4
-## [5,]    1    1
-## [6,]    1    1
 ```
 The matrix has two columns, since there will be two groups (cases and controls) in this experiment.
 
 The rest of the experiment can be simulated with code like the chunk below. 
 
-
-```r
+```{r builtinex, warning=FALSE, message=FALSE}
 library(polyester)
 library(Biostrings)
 
@@ -112,8 +91,7 @@ If you're an experienced user requiring more flexibility, you can use the `simul
 
 For example, let's say we want to simulate timecourse data. To do this, we will explicitly specify a number of reads to generate for each transcript (row), at each timepoint (column). We will again only simulate from 20 transcripts.
 
-
-```r
+```{r countmat}
 # set up transcript-by-timepoint matrix:
 num_timepoints = 12
 countmat = matrix(readspertx, nrow=length(small_fasta), ncol=num_timepoints)
@@ -156,13 +134,9 @@ We also provide a function `simulate_experiment_empirical` that takes a real tra
 
 To create a count matrix that resembles a real dataset, use the `create_read_numbers` function. To run this example, you will need to install the Ballgown package from Bioconductor if you do not already have it:
 
-
-```r
+```{r installbg, eval=FALSE}
 source("http://bioconductor.org/biocLite.R")
 biocLite("ballgown")
-```
-
-```r
 library(ballgown)
 data(bg)
 bg = subset(bg, "chr=='22'")
@@ -171,7 +145,7 @@ bg = subset(bg, "chr=='22'")
 gtfpath = system.file('extdata', 'bg.gtf.gz', package='polyester')
 gtf = subset(gffRead(gtfpath), seqname=='22')
      
-# load chromosome sequence corresponding to gtf file (just for this example)
+# load chromosome sequence corresponding to gtf file (just for this example -- requires download because of file size)
 system('wget https://www.dropbox.com/s/04i6msi9vu2snif/chr22seq.rda')
 load('chr22seq.rda')
 names(chr22seq) = '22'
@@ -181,13 +155,9 @@ simulate_experiment_empirical(bg, grouplabels=pData(bg)$group, gtf=gtf,
     seqpath=chr22seq, mean_rps=5000, outdir='empirical_reads', seed=1247)
 ```
 
-
-```
-## [1] "fold change direction: 1/0"
-```
-
 # Output
 A call to `simulate_experiment`, `simulate_experiment_countmat`, or `simulate_experiment_empirical` will write FASTA files to the directory specified by the `outdir` argument. Reads in the FASTA file will be labeled with the transcript from which they were simulated, based on the identifiers provided in the initial input, as well as the 1-based start and end positions of the simulated reads. The positions for mate 1 and mate 2 are provided in the **same orientation**, as if the transcript were being scanned for read coverage, even though mate 2 is aligned in the **opposite** orientation. Make sure to parse these positions correctly based on how your read alignments are reported.
+
 
 If `paired` is true, you'll get two FASTA files per biological replicate (left mates are designated by the suffix `_1.fasta`; right mates by `_2.fasta`). If single-end reads are generated (`paired=FALSE`) you'll get one FASTA file per replicate. 
 
@@ -200,50 +170,8 @@ Bug reports are very welcome as issues on our [GitHub repository](https://github
 
 # Session Information
 
-
-```r
+```{r info, results='markup'}
 sessionInfo()
 ```
 
-```
-## R version 3.1.1 (2014-07-10)
-## Platform: x86_64-apple-darwin13.1.0 (64-bit)
-## 
-## locale:
-## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
-## 
-## attached base packages:
-## [1] stats4    parallel  stats     graphics  grDevices utils     datasets 
-## [8] methods   base     
-## 
-## other attached packages:
-##  [1] ballgown_1.0.1      Biostrings_2.34.0   XVector_0.6.0      
-##  [4] IRanges_2.0.0       S4Vectors_0.4.0     BiocGenerics_0.12.1
-##  [7] polyester_1.2.0     knitr_1.8.2         colorout_1.0-3     
-## [10] devtools_1.6.1     
-## 
-## loaded via a namespace (and not attached):
-##  [1] annotate_1.44.0         AnnotationDbi_1.28.1   
-##  [3] base64enc_0.1-2         BatchJobs_1.5          
-##  [5] BBmisc_1.8              Biobase_2.26.0         
-##  [7] BiocParallel_1.0.0      bitops_1.0-6           
-##  [9] brew_1.0-6              checkmate_1.5.0        
-## [11] codetools_0.2-9         DBI_0.3.1              
-## [13] digest_0.6.4            evaluate_0.5.5         
-## [15] fail_1.2                foreach_1.4.2          
-## [17] formatR_1.0             genefilter_1.48.1      
-## [19] GenomeInfoDb_1.2.3      GenomicAlignments_1.2.1
-## [21] GenomicRanges_1.18.3    grid_3.1.1             
-## [23] iterators_1.0.7         lattice_0.20-29        
-## [25] limma_3.22.1            logspline_2.1.5        
-## [27] markdown_0.7.4          Matrix_1.1-4           
-## [29] mgcv_1.8-4              nlme_3.1-118           
-## [31] RColorBrewer_1.1-2      RCurl_1.95-4.5         
-## [33] Rsamtools_1.18.2        RSQLite_1.0.0          
-## [35] rtracklayer_1.26.2      sendmailR_1.2-1        
-## [37] splines_3.1.1           stringr_0.6.2          
-## [39] survival_2.37-7         sva_3.12.0             
-## [41] tools_3.1.1             XML_3.98-1.1           
-## [43] xtable_1.7-4            zlibbioc_1.12.0
-```
 
