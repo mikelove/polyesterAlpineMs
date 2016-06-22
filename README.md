@@ -16,6 +16,7 @@ https://github.com/mikelove/polyesterAlpineMs/blob/master/R/sgseq.R#L19-L22
 
 * I allow counts of 0 fragments:
 
+https://github.com/mikelove/polyesterAlpineMs/blob/master/R/simulate_experiment.R#L333-L334
 https://github.com/mikelove/polyesterAlpineMs/blob/master/R/simulate_experiment.R#L359-L360
 
 * I save the internal count table:
